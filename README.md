@@ -89,13 +89,13 @@ There are three interfaces to choose from when creating a custom check: IPLTSCNT
 When a violation of a custom validation rule is found, use the PLTSError and IPLTSError2 interface to report the problem. All the validation results should be added into a collection using the PLTSErrorCollection and IPLTSErrorCollection interface.
 
 #####IPLTSError2
-|Property/Function Name       |Description               |
-|:--------------------------- |:--------------|
-|||
-|||
-|||
-|||
-|||
-|||
-|||
-|||
+|Property Name      |Description        |
+|:------------------|:------------------|
+|ErrorGeometry      |Get/Set geometry of validation result.|
+|ErrorID            |Get/Set unique identifier for validation result.|
+|ErrorKind          |Get/Set type of validation result (value from enum pltsValErrorKind)|
+|ErrorNumber        |Get/Set a numeric number representing the validation result (deprecated )|
+|ShortDescription   |Get/Set string representing short description of validation result.|
+|LongDescription    |Get/Set string representing detailed description of validation result.|
+|OID                |Get/Set object id of row/feature associated with validation result.|
+|QualifiedTableName |Get/Set qualified dataset name of row/feature associated with validation result.|
