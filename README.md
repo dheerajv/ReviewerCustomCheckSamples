@@ -99,3 +99,29 @@ When a violation of a custom validation rule is found, use the PLTSError and IPL
 |LongDescription    |Get/Set string representing detailed description of validation result.|
 |OID                |Get/Set object id of row/feature associated with validation result.|
 |QualifiedTableName |Get/Set qualified dataset name of row/feature associated with validation result.|
+
+#####IPLTSErrorCollection
+|Property Name      |Description        |
+|:------------------|:------------------|
+|Count              |Get count of items in collection.|
+|AddError           |Add item to collection.|
+|get_Errors         |Get an item in collection at specified index.|
+|RemoveError        |Remove item in collection at specified index.|
+|set_Errors         |Add item in collection at specified index.|
+
+----------
+     Note: ErrorNumber was used with Condition tables (CNTs), but CNTs are no longer supported in the product.
+
+####Map to the Reviewer Table Fields
+Values returned by certain properties on the objects and interfaces explained above are stored in specific fields within the Reviewer table. Below is a map of the properties and fields. IPLTSCNTSelectionSetValExtension is used when referring to an interface property but it also applies to IPLTSCNTObjectClassValExtension and IPLTSCNTWorkspaceValExtension as well.
+
+|Property Name                                         |Reviewer Table Field        |
+|:-----------------------------------------------------|:------------------|
+|IPLTSCNTSelectionSetValExtension.Name                 |OriginCheck|
+|IPLTSCNTSelectionSetValExtension.ShortDescription     |Notes (appended to value from Custom Check dialog)|
+|IPLTSError2.LongDescription                           |ReviewStatus|
+|IPLTSError2.ShortDescription                          |ReviewStatus (only if LongDescription is empty)|
+|IPLTSError2.OID                                       |ObjectID|
+
+####Deploy a Custom Check
+To deploy a custom check, the assembly must be copied to each machine it will be executed on and registered using the regasm.exe tool (e.g. regasm.exe C:\MyCustomCode\MyCustomCheck.dll \codebase). The location the assembly is copied to should not matter as long as all dependent assemblies can be resolved at runtime (ArcGIS and Data Reviewer assemblies are stored in the GAC).
