@@ -1,2 +1,2 @@
-#ReviewerCustomCheckSamples
-#Topic : Create Custom Check (ArcGIS 10.4)
+#Data Reviewer Custom Check Samples
+#Validate Domain Based Attribute
