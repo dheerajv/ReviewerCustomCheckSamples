@@ -113,7 +113,7 @@ namespace CustomCheckValidateDomainBasedAttributes
             //This is the array of fully qualified feature class/table names
             string[] arrayOfArguments = arguments.Split(new char[] { ',' }, StringSplitOptions.None);
 
-            //loop through the feature classes/tables and check for any attribute that violate domain constraints
+            //loop through the feature classes/tables and check for any attributes that violate domain constraints
             for (int i = 0; i < arrayOfArguments.Length; i++)
             {
                 string strTableName = arrayOfArguments[i];
@@ -142,7 +142,7 @@ namespace CustomCheckValidateDomainBasedAttributes
             //Get a list of fields that has domain applied
             List<IField> domainFields = GetDomainFields(ipTable);
 
-            //loop through all the fields that has domain and check if there are any records that violates domain constraints.
+            //loop through all the fields that has domain and check if there are any records that violate domain constraints.
             for (int i = 0; i < domainFields.Count;i++ )
             {
                 string strFieldName = domainFields[i].Name;
@@ -152,7 +152,7 @@ namespace CustomCheckValidateDomainBasedAttributes
                     IDomain ipDomain = domainFields[i].Domain;
                     string strErrorConditionQueryString = "";
 
-                    //Get the query string for searching records that violates domain constraints
+                    //Get the query string for searching records that violate domain constraints
                     if(ipDomain.Type == esriDomainType.esriDTRange)
                     {
                         strErrorConditionQueryString = GetQueryStringForRangeDomain(ipDomain as IRangeDomain, strFieldName);
@@ -164,7 +164,7 @@ namespace CustomCheckValidateDomainBasedAttributes
 
                     if (!string.IsNullOrEmpty(strErrorConditionQueryString))
                     {
-                        //Use the query string to search records that violates domain constraints
+                        //Use the query string to search records that violate domain constraints
                         IQueryFilter ipQF = new QueryFilter();
                         ipQF.WhereClause = strErrorConditionQueryString;
                         ICursor ipCursor = ipTable.Search(ipQF, true);
