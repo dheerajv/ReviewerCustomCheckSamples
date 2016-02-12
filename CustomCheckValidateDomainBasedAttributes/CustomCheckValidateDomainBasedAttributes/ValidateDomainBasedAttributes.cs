@@ -689,6 +689,5 @@ namespace CustomCheckValidateDomainBasedAttributes
             return false;
         }
         #endregion
-
     }
 }
