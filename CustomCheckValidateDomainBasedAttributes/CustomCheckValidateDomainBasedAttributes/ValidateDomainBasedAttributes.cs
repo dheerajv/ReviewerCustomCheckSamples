@@ -120,7 +120,32 @@ namespace CustomCheckValidateDomainBasedAttributes
                 if (DatasetExists(validateMe, strTableName))
                 {
                     ITable ipTable = (validateMe as IFeatureWorkspace).OpenTable(strTableName);
-                    ValidateAttributes(ipRevResultCollection, ipTable);
+                    
+                    bool bHasSubtype = false;
+                    ISubtypes ipSubtypes = ipTable as ISubtypes;
+                    if (null != ipSubtypes)
+                        bHasSubtype = ipSubtypes.HasSubtype;
+                    
+                    if(bHasSubtype)
+                    {
+                        IEnumSubtype ipEnumSubtype = ipSubtypes.Subtypes;
+                        if(null != ipEnumSubtype)
+                        {
+                            ipEnumSubtype.Reset();
+                            int iSubtypeCode;
+                            string strSubtypeName;
+                            strSubtypeName = ipEnumSubtype.Next(out iSubtypeCode);
+                            while(null != strSubtypeName)
+                            {
+                                ValidateSubtype(ipRevResultCollection, ipSubtypes, iSubtypeCode);
+                                strSubtypeName = ipEnumSubtype.Next(out iSubtypeCode);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        ValidateTable(ipRevResultCollection, ipTable);
+                    }
                 }
             }
             m_ipWorkspace = null;
@@ -134,74 +159,135 @@ namespace CustomCheckValidateDomainBasedAttributes
         /// </summary>
         /// <param name="ipErrorCollection">Collection of validation results</param>
         /// <param name="ipTable">Feature class/Table whose attributes will be validated for domain constraints</param>
-        private void ValidateAttributes(IPLTSErrorCollection ipErrorCollection, ITable ipTable)
+        private void ValidateTable(IPLTSErrorCollection ipErrorCollection, ITable ipTable)
         {
             if (null == ipTable || null == ipErrorCollection)
                 return;
-            
+
             //Get a list of fields that has domain applied
             List<IField> domainFields = GetDomainFields(ipTable);
 
             //loop through all the fields that has domain and check if there are any records that violate domain constraints.
-            for (int i = 0; i < domainFields.Count;i++ )
+            for (int i = 0; i < domainFields.Count; i++)
             {
                 string strFieldName = domainFields[i].Name;
                 int intFieldIndex = ipTable.Fields.FindField(strFieldName);
-                if(intFieldIndex >= 0)
+                if (intFieldIndex >= 0)
                 {
                     IDomain ipDomain = domainFields[i].Domain;
-                    string strErrorConditionQueryString = "";
+                    ValidateAttributes(ipErrorCollection, ipTable, ipDomain, strFieldName, false, "", -1);
+                }
+            }
+        }
 
-                    //Get the query string for searching records that violate domain constraints
-                    if(ipDomain.Type == esriDomainType.esriDTRange)
+        /// <summary>
+        /// Validates the attributes in a the subtype of a Feature Class/Table for domain constraints
+        /// </summary>
+        /// <param name="ipErrorCollection">Collection of validation results</param>
+        /// <param name="ipSubtypes">Subtypes in the feature class/table</param>
+        /// <param name="iSubtypeCode">SubtypeCode of the subtype that needs to be validated</param>
+        private void ValidateSubtype(IPLTSErrorCollection ipErrorCollection, ISubtypes ipSubtypes, int iSubtypeCode)
+        {
+            if (null == ipSubtypes || null == ipErrorCollection)
+                return;
+            ITable ipTable = (ipSubtypes as ITable);
+            if (null == ipTable)
+                return;
+
+            string strSubtypeFieldName = ipSubtypes.SubtypeFieldName;
+
+            IFields ipFields = ipTable.Fields;
+            if(null != ipFields)
+            {
+                long lFieldCount = ipFields.FieldCount;
+                for (int i = 0; i < ipFields.FieldCount; i++)
+                {
+                    IField ipField = ipFields.get_Field(i);
+                    if (!(ipField.Type == esriFieldType.esriFieldTypeBlob ||
+                        ipField.Type == esriFieldType.esriFieldTypeGeometry ||
+                        ipField.Type == esriFieldType.esriFieldTypeOID ||
+                        ipField.Type == esriFieldType.esriFieldTypeRaster ||
+                        ipField.Type == esriFieldType.esriFieldTypeGlobalID ||
+                        ipField.Type == esriFieldType.esriFieldTypeGUID ||
+                        ipField.Type == esriFieldType.esriFieldTypeXML))
                     {
-                        strErrorConditionQueryString = GetQueryStringForRangeDomain(ipDomain as IRangeDomain, strFieldName);
-                    }
-                    else if(ipDomain.Type == esriDomainType.esriDTCodedValue)
-                    {
-                        strErrorConditionQueryString = GetQueryStringForCodedDomain(ipDomain as ICodedValueDomain, strFieldName);
-                    }
-
-                    if (!string.IsNullOrEmpty(strErrorConditionQueryString))
-                    {
-                        //Use the query string to search records that violate domain constraints
-                        IQueryFilter ipQF = new QueryFilter();
-                        ipQF.WhereClause = strErrorConditionQueryString;
-                        ICursor ipCursor = ipTable.Search(ipQF, true);
-                        if(null != ipCursor)
-                        {
-                            IRow ipRow = ipCursor.NextRow();
-                            while(null != ipRow)
-                            {
-                                //Create a Reviewer result
-                                IPLTSError2 ipReviewerResult = new PLTSError() as IPLTSError2;
-                                ipReviewerResult.ErrorKind = pltsValErrorKind.pltsValErrorKindStandard;
-                                ipReviewerResult.OID = ipRow.OID;
-                                ipReviewerResult.LongDescription = "Domain constraints violated for " + strFieldName + " field";
-                                ipReviewerResult.QualifiedTableName = (ipTable as IDataset).Name;
-
-                                //If the record is a feature then use the feature geometry as Result's error geometry
-                                IFeature ipFeature = ipRow as IFeature;
-                                if(null != ipFeature)
-                                {
-                                    IGeometry ipErrorGeometry = ipFeature.ShapeCopy;
-                                    if(!ipErrorGeometry.IsEmpty)
-                                        ipReviewerResult.ErrorGeometry = ipErrorGeometry;
-                                }
-
-                                //Add the result to the collection of results
-                                ipErrorCollection.AddError(ipReviewerResult);
-                                
-                                ipRow = ipCursor.NextRow();
-                            }
-                            //release cursor
-                            System.Runtime.InteropServices.Marshal.ReleaseComObject(ipCursor);
-                            ipCursor = null;
-                        }
+                        IDomain ipDomain = ipSubtypes.get_Domain(iSubtypeCode, ipField.Name);
+                        if(null != ipDomain)
+                            ValidateAttributes(ipErrorCollection, ipTable, ipDomain, ipField.Name, true, strSubtypeFieldName, iSubtypeCode);
                     }
                 }
             }
         }
+
+        
+        /// <summary>
+        /// Validates the attributes in a Feature Class/Table or its subtype for domain constraints
+        /// </summary>
+        /// <param name="ipErrorCollection">Collection of validation results</param>
+        /// <param name="ipTable">Feature class/Table whose attributes will be validated for domain constraints</param>
+        /// <param name="ipDomain">Domain for which attributes need to be validated</param>
+        /// <param name="strDomainFieldName">Name of the domain field</param>
+        /// <param name="bHasSubtype">input true if the feature class/table has subype else false</param>
+        /// <param name="strSubtypeFieldName">Name of the subtype field</param>
+        /// <param name="iSubtypeCode">Subtype code for the subtype that need to be validated for the domain constraints</param>
+        private void ValidateAttributes(IPLTSErrorCollection ipErrorCollection, ITable ipTable, IDomain ipDomain, string strDomainFieldName, bool bHasSubtype, string strSubtypeFieldName, int iSubtypeCode)
+        {
+            string strErrorConditionQueryString = "";
+
+            //Get the query string for searching records that violate domain constraints
+            if (ipDomain.Type == esriDomainType.esriDTRange)
+            {
+                strErrorConditionQueryString = GetQueryStringForRangeDomain(ipDomain as IRangeDomain, strDomainFieldName);
+            }
+            else if (ipDomain.Type == esriDomainType.esriDTCodedValue)
+            {
+                strErrorConditionQueryString = GetQueryStringForCodedDomain(ipDomain as ICodedValueDomain, strDomainFieldName);
+            }
+
+            if (!string.IsNullOrEmpty(strErrorConditionQueryString))
+            {
+                //Apply subtype filter if needed
+                if(bHasSubtype && !string.IsNullOrEmpty(strSubtypeFieldName))
+                    strErrorConditionQueryString += " AND " + strSubtypeFieldName + " = " + iSubtypeCode;
+
+                //Use the query string to search records that violate domain constraints
+                IQueryFilter ipQF = new QueryFilter();
+                ipQF.WhereClause = strErrorConditionQueryString;
+                ICursor ipCursor = ipTable.Search(ipQF, true);
+                if (null != ipCursor)
+                {
+                    IRow ipRow = ipCursor.NextRow();
+                    while (null != ipRow)
+                    {
+                        //Create a Reviewer result
+                        IPLTSError2 ipReviewerResult = new PLTSError() as IPLTSError2;
+                        ipReviewerResult.ErrorKind = pltsValErrorKind.pltsValErrorKindStandard;
+                        ipReviewerResult.OID = ipRow.OID;
+                        ipReviewerResult.LongDescription = "Domain constraints violated for " + strDomainFieldName + " field";
+                        ipReviewerResult.QualifiedTableName = (ipTable as IDataset).Name;
+
+                        //If the record is a feature then use the feature geometry as Result's error geometry
+                        IFeature ipFeature = ipRow as IFeature;
+                        if (null != ipFeature)
+                        {
+                            IGeometry ipErrorGeometry = ipFeature.ShapeCopy;
+                            if (!ipErrorGeometry.IsEmpty)
+                                ipReviewerResult.ErrorGeometry = ipErrorGeometry;
+                        }
+
+                        //Add the result to the collection of results
+                        ipErrorCollection.AddError(ipReviewerResult);
+
+                        ipRow = ipCursor.NextRow();
+                    }
+                    //release cursor
+                    System.Runtime.InteropServices.Marshal.ReleaseComObject(ipCursor);
+                    ipCursor = null;
+                }
+            }
+            return;
+        }
+        
         /// <summary>
         /// Used for RangeDomain
         /// This function is used to construct a query string which when executed on the source Feature Class/Table will return the records that violate domain constraints.
@@ -578,6 +664,7 @@ namespace CustomCheckValidateDomainBasedAttributes
             }
             return domainFields;
         }
+
         /// <summary>
         /// Used for checking if a dataset exists in a workspace
         /// </summary>
