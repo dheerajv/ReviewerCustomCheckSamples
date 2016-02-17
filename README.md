@@ -10,7 +10,8 @@ Custom checks are programs that can be incorporated into the ArcGIS Data Reviewe
 
 [ArcGIS Data Reviewer](http://www.esri.com/software/arcgis/extensions/arcgis-data-reviewer/index.html) provides over 42 out-of-the-box [checks](http://desktop.arcgis.com/en/arcmap/latest/extensions/data-reviewer/checks-in-data-reviewer.htm) that can be run individually or grouped into [batch jobs](http://desktop.arcgis.com/en/arcmap/latest/extensions/data-reviewer/batch-jobs-and-data-reviewer.htm) (.rbj files). If these included checks do not meet your specific requirements, these samples can help you write a custom check to meet your specific organization requirements.
 
-## Features
+## Features 
+
 
 This folder contains Data Reviewer Custom Check Samples that fall under the 'ReviewerCustomCheckSamples' topic:
 
