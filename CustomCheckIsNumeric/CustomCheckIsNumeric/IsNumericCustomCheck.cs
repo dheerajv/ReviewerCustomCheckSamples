@@ -1,6 +1,5 @@
 using System;
 using System.Runtime.InteropServices;
-using ESRI.ArcGIS.Framework;
 using ESRI.ArcGIS.Geodatabase;
 using ESRI.Reviewer.Public.Engine;
 
