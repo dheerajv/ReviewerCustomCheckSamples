@@ -107,7 +107,7 @@ namespace CustomCheckValidateDomainBasedAttributes
         public IPLTSErrorCollection Execute(IWorkspace validateMe, string arguments)
         {
             m_ipWorkspace = validateMe;
-            IPLTSErrorCollection ipRevResultCollection = new PLTSErrorCollection();
+            IPLTSErrorCollection ipRevResultCollection = new PLTSErrorCollectionClass();
 
             //Split comma delimited string into array
             //This is the array of fully qualified feature class/table names
@@ -260,7 +260,7 @@ namespace CustomCheckValidateDomainBasedAttributes
                     while (null != ipRow)
                     {
                         //Create a Reviewer result
-                        IPLTSError2 ipReviewerResult = new PLTSError() as IPLTSError2;
+                        IPLTSError2 ipReviewerResult = new PLTSErrorClass() as IPLTSError2;
                         ipReviewerResult.ErrorKind = pltsValErrorKind.pltsValErrorKindStandard;
                         ipReviewerResult.OID = ipRow.OID;
                         ipReviewerResult.LongDescription = "Domain constraints violated for " + strDomainFieldName + " field";
