@@ -97,7 +97,7 @@ namespace CustomCheckFeatureOnFeature
             //Exit if there is nothing to check
             if (0 == ipSelectionToValidate.Count)
             {
-                return new PLTSErrorCollection();
+                return new PLTSErrorCollectionClass();
             }
 
             //Arguments and default values
@@ -206,7 +206,7 @@ namespace CustomCheckFeatureOnFeature
                 ipSourceQF.WhereClause = strSourceWhereClause;
             }
 
-            IPLTSErrorCollection ipRevResultCollection = new PLTSErrorCollection();
+            IPLTSErrorCollection ipRevResultCollection = new PLTSErrorCollectionClass();
             
             //Loop through source geometries and perform a spatial query againts the target Feature Class.
             //For each geometry that does not satisfy the spatial relationship add a Reviewer result.
@@ -227,7 +227,7 @@ namespace CustomCheckFeatureOnFeature
                 if (ipTargetFeatureClass.FeatureCount(ipTargetSF) == 0)
                 {
                     //Create a Reviewer result
-                    IPLTSError2 ipReviewerResult = new PLTSError() as IPLTSError2;
+                    IPLTSError2 ipReviewerResult = new PLTSErrorClass() as IPLTSError2;
                     ipReviewerResult.ErrorKind = pltsValErrorKind.pltsValErrorKindStandard;
                     ipReviewerResult.OID = ipSourceFeature.OID;
                     ipReviewerResult.LongDescription = strUserMessage;

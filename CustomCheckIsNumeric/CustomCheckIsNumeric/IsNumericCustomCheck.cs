@@ -116,7 +116,7 @@ namespace CustomCheckIsNumeric
             }
 
             //Collection of results passed back to Data Reviewer
-            IPLTSErrorCollection ipRevResultCollection = new PLTSErrorCollection();
+            IPLTSErrorCollection ipRevResultCollection = new PLTSErrorCollectionClass();
 
             //Loop through rows and check if field is numeric
             IRow ipRow = ipCursor.NextRow();
@@ -136,7 +136,7 @@ namespace CustomCheckIsNumeric
                 if (!bIsNumeric)
                 {
                     //Create Reviewer result and add to collection
-                    IPLTSError2 ipRevResult = new PLTSError() as IPLTSError2;
+                    IPLTSError2 ipRevResult = new PLTSErrorClass() as IPLTSError2;
                     ipRevResult.ErrorKind = pltsValErrorKind.pltsValErrorKindStandard;
                     ipRevResult.OID = ipRow.OID;
                     ipRevResult.QualifiedTableName = ipSourceDataset.Name;

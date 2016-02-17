@@ -53,7 +53,8 @@
     </Reference>
     <Reference Include="ESRI.Reviewer.Public.Engine.Interop">
       <HintPath>..\..\..\..\..\..\..\..\PLTS\Bin\ESRI.Reviewer.Public.Engine.Interop.dll</HintPath>
-      <EmbedInteropTypes>True</EmbedInteropTypes>
+      <EmbedInteropTypes>False</EmbedInteropTypes>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
