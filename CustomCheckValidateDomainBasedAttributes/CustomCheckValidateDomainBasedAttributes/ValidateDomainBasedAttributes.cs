@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Runtime.InteropServices;
 using ESRI.ArcGIS.Geodatabase;
 using ESRI.ArcGIS.Geometry;
